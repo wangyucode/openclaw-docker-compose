@@ -1,0 +1,59 @@
+# OpenClaw 核心服务编排配置
+# 负责启动 gateway 和 cli 服务
+version: "3.8" # 兼容主流 Docker Compose 版本
+
+services:
+  # OpenClaw 网关服务：核心通信入口，处理外部请求
+  openclaw-gateway:
+    # Docker hub 镜像
+    image: alpine/openclaw:latest
+    # 容器名（可选，便于识别）
+    container_name: openclaw-gateway
+    # 重启策略：异常退出时自动重启
+    restart: unless-stopped
+    # 端口映射
+    ports:
+      # 网关主端口（默认 18789）
+      - "18789:18789"
+      # 桥接端口（默认 18790）
+      - "0.0.0.0:18790:18790"
+    environment:
+      - NODE_ENV=production
+      - OPENCLAW_CONFIG_DIR=/home/node/.openclaw
+      - OPENCLAW_WORKSPACE_DIR=/home/node/.openclaw/workspace
+      # 网关令牌 **必须修改！！！**，用于验证外部请求来源
+      - OPENCLAW_GATEWAY_TOKEN=your-secret-token
+      - OPENCLAW_DOCKER_APT_PACKAGES=
+    volumes:
+      # 配置目录：宿主机 ~/.openclaw 映射到容器内 /home/node/.openclaw
+      - ./openclaw:/home/node/.openclaw
+      # 工作目录：宿主机 ~/.openclaw/workspace 映射到容器内对应路径
+      - ./openclaw/workspace:/home/node/.openclaw/workspace
+    # 网络模式（默认 bridge，如需宿主机网络可改为 host）
+    network_mode: bridge
+
+  # OpenClaw 命令行工具：用于初始化、渠道配置（如 WhatsApp/Telegram/Discord）
+  openclaw-cli:
+    image: alpine/openclaw:latest
+    container_name: openclaw-cli
+    # 仅按需运行（不常驻），故不配置重启策略
+    restart: "no"
+    # 依赖 gateway 服务（可选，确保 gateway 先启动）
+    depends_on:
+      - openclaw-gateway
+    # 环境变量与 gateway 保持一致
+    environment:
+      - NODE_ENV=production
+      - OPENCLAW_CONFIG_DIR=/home/node/.openclaw
+      - OPENCLAW_WORKSPACE_DIR=/home/node/.openclaw/workspace
+      # 网关令牌 **必须修改！！！**，和 gateway 配置保持一致
+      - OPENCLAW_GATEWAY_TOKEN=your-secret-token
+    # 卷映射与 gateway 保持一致（确保配置共享）
+    volumes:
+      - ./openclaw:/home/node/.openclaw
+      - ./openclaw/workspace:/home/node/.openclaw/workspace
+    # 交互式运行（支持命令行输入）
+    stdin_open: true
+    tty: true
+    # 默认命令（可覆盖，如执行 onboard 初始化）
+    command: ["bash"]
