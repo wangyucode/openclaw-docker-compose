@@ -3,12 +3,6 @@
 这是一个用于快速部署 [OpenClaw](https://github.com/openclaw/openclaw) 的 Docker Compose 配置文件。
 用于以安全的容器化方式快速部署 OpenClaw
 
-## 引用
-
-- **Docker Hub 镜像**: [alpine/openclaw](https://hub.docker.com/r/alpine/openclaw)
-- **GitHub 仓库**: [openclaw/openclaw](https://github.com/openclaw/openclaw)
-
----
 
 ## 项目组成
 
@@ -83,6 +77,14 @@ openclaw onboard
     ```bash
     rm -rf ./openclaw
     ```
+---
+
+## 引用
+
+- **Docker Hub 镜像**: [alpine/openclaw](https://hub.docker.com/r/alpine/openclaw)
+- **GitHub 仓库**: [openclaw/openclaw](https://github.com/openclaw/openclaw)
+
+
 
 
 
